@@ -1,0 +1,134 @@
+        
+      
+      
+                    CUSTOMER RELATIONSHIP MANAGEMENT 
+                          CA3 Group Assignment 
+                            Jan 2026 Term 
+           
+         
+        Assessment   
+        100 marks (This assignment constitutes 30% of the overall assessment)   
+         
+         
+        Rationale of Group Project   
+        This assignment consolidates key learnings from the Customer Relationship Management module 
+        by enabling students to apply concepts and principles through data mining on CRM-related datasets. 
+        Student(s) are expected to apply all the necessary concepts and principles to the provided business 
+        case and work with real data by applying the relevant techniques to understand the customer, 
+        uncover insights about the customer and propose ways to retain customers using survival analysis. 
+        Student are expected to apply real-world knowledge to analyse and derive insights into the dataset.   
+         
+        Project Requirement 
+        Student(s) will need to obtain an appropriate dataset that allows them to apply the concepts taught 
+        in  class  to  real-world  understanding. This dataset must be relevant to allow you to apply the 
+        appropriate techniques to managing customers, e.g. customer retention using survival analysis, 
+        segmentation using clustering techniques. Marking criteria will include being able to draw insights 
+        from the dataset and the ability to apply the appropriate techniques to make recommendations on 
+        how to better manage the customers. 
+         
+        This project will require all the relevant skills you have learnt in the course, with an emphasis on 
+        attempting to predict specific outcomes based on your dataset. You should be able to communicate 
+        your results with high clarity.   
+         
+                     
+                                
+                            Page  1  of  4 
+                                                         
+                   
+                   
+                  Project Question   
+                  You have garnered the dataset of customers purchasing a product, e.g. BYD EVs, Pandora, etc... 
+                  applying new credit card, apartment loans or car rental services. The customers range from low, 
+                  middle, to high income working adults. Datasets can be downloaded from popular data repositories, 
+                  random data or conduct of a survey questionnaire. 
+                   
+                  The main objective is to explain how to increase sales of products/services or signed agreements. 
+                     
+                  Conduct  a  research  study  to  provide  explanations  for  the  trend  and  any  outliers.  Use  the 
+                  appropriate charts, graphs and models to support your explanations.   
+                   
+                  Explain with workings what prediction can/ cannot be made using the garnered dataset. Student(s) 
+                  can use software or tools to perform the analysis (for example, using Excel, Tableau, Python, R, 
+                  RStudio, etc). 
+                   
+                  However, it is compulsory to use the following models/methods in R: 
+                      •   Linear Regression   
+                      •   Multiple Regression   
+                      •   Plots for Regression   
+                      •   VIF for Multicollinearity 
+                   
+                  Student(s) main tasks will include: 
+                      1.  Apply the various techniques taught in class.   
+                      2.  Based on the garnered dataset, student to identify a business problem/opportunity from 
+                          customers and make appropriate recommendations on how to better engage/retain them.   
+                      3.  Exploring the garnered dataset, student should be able to identify the data quality issues 
+                          and use an appropriate treatment method for each issue identified. Explain why the reviews 
+                          need to be addressed using Table 1, as an example below.   
+                      4.  Student(s) should use tools that they have been taught, include but not limited to R Studio, 
+                          to analyse their data after treatment. 
+                      5.  Communicate insights and recommendations that would be of relevance to the business 
+                          owner of the dataset.   
+                                                   Table 1: Type of reviews to be addressed 
+                                   S/N               Type of reviews to be                Why the reviews need 
+                                                           addressed                         to be addressed? 
+                                    1           Duplicate IDs                                   
+                                    2           Alien wordings or symbols                       
+                                    3           Entries like “nil” and “na”                     
+                   
+                                                                        
+                                                                 Page  2  of  4 
+                                                                                                                                    
+                        
+                        
+                        
+                       Assessment Marks Allocation   
+                       The assignment will be evaluated using the following criteria:   
+                        1.  Content: 60%   
+                             Student(s) must demonstrate their understanding of this course concepts and theories by 
+                             identifying connections and applying them to the case study. Additional details and clarity can 
+                             be included in the Appendix section. 
+                              -    A maximum of 60 marks will be awarded.   
+                              
+                        2.  Presentation Delivery: 40%   
+                             Student(s) needs to show evidence of professional preparation for the presentation. Student(s) 
+                             will need to deliver content in a professional manner within the allocated designated time.   
+                             -   A maximum of 20 marks will be awarded.   
+                              
+                             The PowerPoint must be arranged in a clear, rational, and logical order to maintain good flow 
+                             and coherence of the presentation.   
+                             -   A maximum of 20 marks will be awarded.   
+                        
+                        
+                       Instructions   
+                       Written Report Submission   
+                       Submission for the CA will be via a MS Word (.docx) document. There should be no more than 10 
+                       pages, this will exclude the Cover page, references and appendix. 
+                       PowerPoint Submission   
+                       Submission for the CA will be via a PowerPoint presentation. There should be no more than 20 slides, 
+                       and this will exclude the Title slides, Agenda & Appendix. 
+                        
+                       Penalty Marks for Late Submission of Assignment   
+                       By one day                        :    20% to be deducted from total marks.   
+                       More than one day                 :    Submission will NOT be graded.   
+                        
+                        
+                                                          
+                                                                                           
+                                                                                  Page  3  of  4 
+                                                                                                                                                                       
+         
+         
+         
+        Plagiarism and Collusion 
+        The submitted Written Report and PowerPoint must be the student’s own work, with all workings 
+        and reasonable explanations provided; plagiarism, including AI-generated content, and collusion 
+        are serious offences that will be referred to the administration, and grades will be withheld pending 
+        investigation if plagiarism or collusion is suspected. 
+         
+        Important Dates of CA3 Submission:   
+        CA3 Group Assignment Deadline:    13 February 2026, 11:59 am     
+        Submit your Document and PowerPoint slides via Canvas. Only Word Documents, Final Dataset 
+        and PowerPoint slides submitted via Canvas will be accepted. 
+                                
+                            Page  4  of  4 
+                                                         

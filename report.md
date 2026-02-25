@@ -1,0 +1,397 @@
+# CRM Analysis Report: Online Retail Transaction Data
+## Customer Relationship Management CA3 Assignment
+
+---
+
+## Executive Summary
+
+This report analyzes the Online Retail Transaction Data from a UK-based online gift retailer to understand customer behavior and provide data-driven recommendations for increasing sales. Using R programming, we applied **RFM analysis**, **K-Means Clustering**, **linear regression**, and **multiple regression with VIF checks**. 
+
+The K-Means clustering analysis (Silhouette Score = 0.616) identified 4 distinct customer segments, with **Elite VIP and VIP Customers (5.1%)** together contributing **47.9% of total revenue**. Champions and Loyal Customers (39.4% of customers) contribute 80.7% of total revenue, revealing significant opportunities for targeted retention strategies.
+
+---
+
+## 1. Introduction and Business Context
+
+### 1.1 Dataset Overview
+
+The dataset comprises transactional records from a UK-based non-store online retailer specializing in unique all-occasion gifts. The data spans **December 2010 to December 2011**, with customers primarily being wholesalers across 37 countries.
+
+**Dataset Source:** Online Retail Transaction Data from Kaggle (Chen, D., London South Bank University)
+
+| Attribute | Description |
+|-----------|-------------|
+| InvoiceNo | 6-digit invoice number (prefix 'C' indicates cancellation) |
+| StockCode | 5-digit product identifier |
+| Description | Product name |
+| Quantity | Units per transaction |
+| InvoiceDate | Transaction timestamp |
+| UnitPrice | Price per unit (GBP) |
+| CustomerID | Customer identifier |
+| Country | Customer location |
+
+### 1.2 Business Objective
+
+**Main Objective:** Explain how to increase sales of products/services through customer understanding and predictive modeling.
+
+**Specific Goals:**
+1. Identify data quality issues and apply appropriate treatments
+2. Segment customers using RFM analysis for targeted marketing
+3. Build predictive models to understand revenue drivers
+4. Provide actionable recommendations for customer engagement and retention
+
+---
+
+## 2. Data Quality Assessment and Treatment
+
+Data quality is fundamental to reliable analysis (Lesson 2: Profiling and Predictive Modelling).
+
+### Table 1: Data Quality Issues Addressed
+
+| S/N | Type of Issue | Count | Why It Needs to Be Addressed |
+|-----|---------------|-------|------------------------------|
+| 1 | **Duplicate Records** | 0 | Duplicates can skew analysis and inflate metrics |
+| 2 | **Missing CustomerID** | 135,080 (24.93%) | Essential for customer-level analysis and RFM segmentation |
+| 3 | **Cancellation Transactions** | 9,288 (1.71%) | Represent returned goods, not actual sales revenue |
+| 4 | **Negative/Zero Quantities** | 10,624 | Invalid quantities cannot contribute meaningfully to analysis |
+| 5 | **Zero Unit Prices** | 2,515 | Indicate free samples or data entry errors |
+| 6 | **Blank Descriptions** | 1,454 | Reduce data quality for product-level analysis |
+
+### 2.1 Data Cleaning Process (R Code)
+
+```r
+# 1. Remove duplicates
+retail_clean <- retail_clean[!duplicated(retail_clean), ]
+
+# 2. Filter cancellation transactions (InvoiceNo starting with 'C')
+retail_clean <- retail_clean[!grepl("^C", retail_clean$InvoiceNo), ]
+
+# 3. Exclude records with missing CustomerID
+retail_clean <- retail_clean[!is.na(retail_clean$CustomerID) & retail_clean$CustomerID != "", ]
+
+# 4. Remove non-positive quantities and prices
+retail_clean <- retail_clean[retail_clean$Quantity > 0, ]
+retail_clean <- retail_clean[retail_clean$UnitPrice > 0, ]
+
+# 5. Create derived fields
+retail_clean$TotalRevenue <- retail_clean$Quantity * retail_clean$UnitPrice
+```
+
+**Results:** Raw data: 541,909 → Cleaned: **397,884 transactions** (73.4% retained), **4,338 unique customers**, **3,665 products**
+
+---
+
+## 3. Exploratory Data Analysis
+
+| Metric | Value |
+|--------|-------|
+| Total Revenue | £8,911,408 |
+| Total Transactions | 18,532 |
+| Total Customers | 4,338 |
+| Countries Served | 37 |
+| Average Order Value | £419.28 |
+
+**Top 5 Countries by Revenue:**
+
+| Country | Revenue (£) | Transactions | Customers |
+|---------|-------------|--------------|-----------|
+| United Kingdom | 7,308,392 | 16,646 | 3,920 |
+| Netherlands | 285,446 | 94 | 9 |
+| EIRE | 265,546 | 260 | 3 |
+| Germany | 228,867 | 457 | 94 |
+| France | 209,024 | 389 | 87 |
+
+![Top Countries by Revenue](figures/01_top_countries_revenue.png)
+
+**Key Insight:** 82% of revenue comes from UK customers, but international markets show high revenue-per-customer potential. Revenue peaks in **November** (pre-holiday season), with peak ordering hours between **10:00 AM and 3:00 PM** (B2B pattern).
+
+---
+
+## 4. Customer Segmentation: RFM Analysis
+
+### 4.1 RFM Methodology
+
+RFM (Recency, Frequency, Monetary) is a customer segmentation technique. We calculated these metrics relative to a reference date (one day after the last transaction).
+
+```r
+# Calculate RFM metrics per customer
+rfm_data <- retail %>%
+  group_by(CustomerID) %>%
+  summarise(
+    Recency = as.numeric(reference_date - max(Date)),
+    Frequency = n_distinct(InvoiceNo),
+    Monetary = sum(TotalRevenue)
+  )
+```
+
+### 4.2 Customer Segments
+
+Based on RFM scores (quintiles), customers were classified into six segments:
+
+```r
+rfm_data <- rfm_data %>%
+  mutate(
+    Customer_Segment = case_when(
+      R_Score >= 4 & F_Score >= 4 & M_Score >= 4 ~ "Champions",
+      R_Score >= 3 & F_Score >= 3 & M_Score >= 3 ~ "Loyal Customers",
+      R_Score >= 4 & F_Score <= 2 ~ "Promising",
+      R_Score <= 2 & F_Score >= 4 ~ "At Risk",
+      R_Score <= 2 & F_Score <= 2 ~ "Lost",
+      TRUE ~ "Regular"
+    )
+  )
+```
+
+| Segment | Count | % Customers | Avg Recency | Avg Frequency | Avg Monetary | Total Revenue |
+|---------|-------|-------------|-------------|---------------|--------------|---------------|
+| **Champions** | 945 | 21.8% | 13 days | 11.2 orders | £6,079 | £5,744,655 |
+| **Loyal Customers** | 764 | 17.6% | 36 days | 4.2 orders | £1,886 | £1,440,904 |
+| **Regular** | 960 | 22.1% | 90 days | 1.9 orders | £637 | £611,520 |
+| **Lost** | 1,077 | 24.8% | 217 days | 1.1 orders | £488 | £525,576 |
+| **At Risk** | 283 | 6.5% | 136 days | 4.9 orders | £1,591 | £450,253 |
+| **Promising** | 309 | 7.1% | 19 days | 1.2 orders | £445 | £137,505 |
+
+![Customer Segmentation](figures/06_rfm_segments.png)
+
+> [!IMPORTANT]
+> **Champions and Loyal Customers (39.4% of customers) contribute 80.7% of total revenue.**
+
+---
+
+## 5. K-Means Clustering Analysis
+
+As stated in Lesson 8: "Automatic Cluster Detection identifies groups of similar records without relying on a target variable."
+
+### 5.1 Data Preparation and Optimal K
+
+```r
+# Standardize RFM variables (mandatory for K-Means)
+rfm_scaled <- scale(rfm_vars[, c("Recency", "Frequency", "Monetary")])
+
+# Elbow Method to determine optimal K
+wss <- numeric(10)
+for (k in 1:10) {
+  km <- kmeans(rfm_scaled, centers = k, nstart = 25, iter.max = 100)
+  wss[k] <- km$tot.withinss
+}
+```
+
+![Elbow Method](figures/13_elbow_plot.png)
+
+**Result:** The "elbow" appears at **K=4**, indicating 4 clusters is optimal.
+
+### 5.2 K-Means Results
+
+```r
+kmeans_result <- kmeans(rfm_scaled, centers = 4, nstart = 25, iter.max = 100)
+```
+
+| Metric | Value |
+|--------|-------|
+| Clusters | 4 |
+| Between SS / Total SS | 68.55% |
+| Silhouette Score | 0.616 (Strong structure) |
+
+| Cluster | Count | % | Avg Recency | Avg Frequency | Avg Monetary | Revenue Share |
+|---------|-------|---|-------------|---------------|--------------|---------------|
+| **Elite VIP** | 13 | 0.3% | 8 days | 82.5 orders | £127,338 | 18.6% |
+| **VIP Customers** | 209 | 4.8% | 16 days | 22.1 orders | £12,510 | 29.3% |
+| **Active Customers** | 3,055 | 70.4% | 44 days | 3.7 orders | £1,353 | 46.4% |
+| **Churned Customers** | 1,061 | 24.5% | 249 days | 1.6 orders | £478 | 5.7% |
+
+![K-Means Clusters](figures/17_kmeans_clusters.png)
+
+> [!IMPORTANT]
+> **K-Means clustering revealed a hidden "Elite VIP" segment of just 13 customers (0.3%) who contribute 18.6% of total revenue.** The combined VIP group (5.1%) accounts for nearly half of all revenue.
+
+---
+
+## 6. Regression Analysis (Required R Techniques)
+
+Following Lesson 4: "Regression is a statistical tool to characterize relationships between a dependent variable (Y) and independent variables (X)."
+
+### 6.1 Simple Linear Regression
+
+**Model:** TotalRevenue ~ TotalOrders
+
+```r
+lm(TotalRevenue ~ TotalOrders, data = customer_data)
+```
+
+| Coefficient | Estimate | Std. Error | t-value | p-value |
+|-------------|----------|------------|---------|---------|
+| (Intercept) | -706.34 | 129.73 | -5.445 | 5.48e-08 *** |
+| TotalOrders | 646.51 | 14.75 | 43.821 | < 2e-16 *** |
+
+- **R-squared:** 0.3065 — TotalOrders explains **30.7%** of revenue variation
+- **F-statistic p-value:** < 2.2e-16 (Highly significant)
+
+**Interpretation:** Each additional order contributes approximately **£646.51** to customer revenue.
+
+![Linear Regression](figures/08_linear_regression.png)
+
+### 6.2 Multiple Regression
+
+**Full Model:** TotalRevenue ~ TotalOrders + TotalItems + TotalProducts + AvgItemPrice + DaysSinceFirst + IsUK
+
+```r
+lm(TotalRevenue ~ TotalOrders + TotalItems + TotalProducts + 
+   AvgItemPrice + DaysSinceFirst + IsUK, data = customer_data)
+```
+
+| Coefficient | Estimate | Std. Error | t-value | p-value | Sig |
+|-------------|----------|------------|---------|---------|-----|
+| (Intercept) | 196.86 | 193.89 | 1.015 | 0.310 | |
+| TotalOrders | 92.51 | 10.49 | 8.821 | < 2e-16 | *** |
+| TotalItems | 1.59 | 0.01 | 127.52 | < 2e-16 | *** |
+| TotalProducts | -3.46 | 0.85 | -4.081 | 4.56e-05 | *** |
+| AvgItemPrice | 4.68 | 1.52 | 3.079 | 0.00209 | ** |
+| DaysSinceFirst | -0.14 | 0.47 | -0.294 | 0.768 | |
+| IsUK | -231.39 | 175.15 | -1.321 | 0.187 | |
+
+- **R-squared:** 0.8549 — Model explains **85.5%** of revenue variation
+- **Adjusted R-squared:** 0.8547
+- **F-statistic p-value:** < 2.2e-16
+
+### 6.3 VIF for Multicollinearity
+
+As stated in Lesson 4: "Multicollinearity can make coefficients unreliable; use VIF() to detect it. Values > 10 indicate high multicollinearity."
+
+```r
+vif(model_full)
+```
+
+| Variable | VIF Value | Interpretation |
+|----------|-----------|----------------|
+| TotalOrders | 2.41 | ✓ Acceptable |
+| TotalItems | 1.46 | ✓ Acceptable |
+| TotalProducts | 1.93 | ✓ Acceptable |
+| AvgItemPrice | 1.00 | ✓ Acceptable |
+| DaysSinceFirst | 1.11 | ✓ Acceptable |
+| IsUK | 1.01 | ✓ Acceptable |
+
+![VIF Analysis](figures/11_vif_analysis.png)
+
+> [!NOTE]
+> All VIF values are below 5, indicating **no significant multicollinearity**. The model coefficients are reliable.
+
+### 6.4 Regression Diagnostics
+
+![Regression Diagnostics](figures/09_regression_diagnostics.png)
+
+**Assessment:** Slight heteroscedasticity visible (typical for revenue data), minor deviations from normality at tails.
+
+### 6.5 Final Model Equation
+
+```
+TotalRevenue = 196.86 + 92.51(TotalOrders) + 1.59(TotalItems) - 3.46(TotalProducts) 
+               + 4.68(AvgItemPrice) - 0.14(DaysSinceFirst) - 231.39(IsUK)
+```
+
+**Key Findings:**
+1. **TotalItems** is the strongest predictor — every additional item purchased adds £1.59 to revenue
+2. **TotalOrders** adds £92.51 per additional order
+3. **TotalProducts** has a negative coefficient — customers buying many different products may be browsing rather than bulk-buying
+
+---
+
+## 7. Business Insights and Recommendations
+
+### 7.1 Identified Business Problem/Opportunity
+
+**Problem:** 24.8% of customers (1,077) are classified as "Lost" and 6.5% (283) are "At Risk"—together representing over **31% of the customer base** that is disengaging.
+
+**Opportunity:** High-value customer segments (Champions and Loyal) drive 80%+ of revenue. Retention strategies for these segments and win-back campaigns for At Risk customers could significantly impact revenue.
+
+### 7.2 Strategic Recommendations
+
+| # | Recommendation | Action | Expected Impact |
+|---|----------------|--------|-----------------|
+| 1 | **Elite Concierge Service** | Assign dedicated account managers, annual gifts, custom procurement | Securing this 0.3% segment protects 18.6% of revenue |
+| 2 | **VIP Retention Program** | Implement loyalty program with exclusive discounts, early access, priority service | Retaining 10% more VIPs = ~£260,000 additional revenue |
+| 3 | **Re-engagement Campaign** | "We miss you" emails with 15-20% discounts, free shipping | Recovering 50% of At-Risk = ~£225,000 |
+| 4 | **Nurture Promising Customers** | Welcome email series, second-purchase incentives, cross-sell recommendations | Increasing frequency from 1.2 to 3.0 orders = 3x lifetime value |
+| 5 | **Expand International Markets** | Focus on Netherlands, Germany, France (high AOV potential) | International customers show 5x higher average order value |
+| 6 | **Optimize Peak Periods** | Increase November inventory, launch October campaigns | Capture pre-holiday shopping demand |
+
+---
+
+## 8. Conclusions
+
+### 8.1 Summary of Findings
+
+1. **Data Quality:** Successfully cleaned 541,909 transactions to 397,884 valid records (73.4% retention)
+2. **Customer Segmentation:** RFM analysis identified 6 segments; Champions (21.8%) and Loyal Customers (17.6%) contribute 80.7% of revenue
+3. **Predictive Modeling:**
+   - Linear Regression: TotalOrders explains 30.7% of revenue variance
+   - Multiple Regression: Combined model explains 85.5% of revenue variance
+   - VIF analysis confirms no multicollinearity issues (all VIF < 5)
+4. **K-Means Clustering:** Silhouette Score of 0.616 confirms strong cluster structure; Elite VIP and VIP customers (5.1%) contribute 47.9% of revenue
+
+### 8.2 Predictions
+
+**What CAN be predicted:** Customer revenue based on order/item quantities, customer segment classification, product popularity and seasonal demand
+
+**What CANNOT be predicted:** Individual product preferences (no browsing data), customer acquisition probability (no prospect data), external market factors
+
+---
+
+## 9. References
+
+1. Knowledge Base - Lesson 1: Data Mining Applications in Marketing and CRM
+2. Knowledge Base - Lesson 2: Profiling and Predictive Modelling (11-Step Methodology)
+3. Knowledge Base - Lesson 3: Data Mining Techniques - RFM Model
+4. Knowledge Base - Lesson 4: Introductory Lesson on R (Regression, VIF, R-squared, p-values)
+5. Knowledge Base - Lesson 8: Customer Segmentation Using Clustering Techniques
+6. Dataset: Chen, D. (London South Bank University). Online Retail Transaction Data. https://www.kaggle.com/datasets/thedevastator/online-retail-transaction-data
+
+---
+
+## Appendix A: R Code Files
+
+All analysis was performed using R with the following scripts:
+1. **01_data_cleaning.R** - Data loading, quality assessment, and cleaning
+2. **02_eda_rfm.R** - Exploratory data analysis and RFM segmentation
+3. **03_regression.R** - Linear regression, multiple regression, and VIF analysis
+4. **04_kmeans_clustering.R** - K-Means clustering with elbow method and silhouette analysis
+
+## Appendix B: Additional EDA Visualizations
+
+| Figure | Description |
+|--------|-------------|
+| 02_daily_revenue_trend.png | Daily revenue time series |
+| 03_monthly_revenue.png | Monthly revenue distribution |
+| 04_top_products.png | Top 10 products by revenue |
+| 05_hourly_orders.png | Orders by hour of day |
+| 07_rfm_scatter.png | RFM scatter plot |
+| 10_coefficient_plot.png | Multiple regression coefficients |
+| 12_actual_vs_predicted.png | Model prediction accuracy |
+| 14_kmeans_distribution.png | K-Means cluster distribution |
+| 15_kmeans_scatter.png | K-Means scatter plot |
+| 16_cluster_profile.png | Cluster profile comparison |
+| 18_silhouette.png | Silhouette analysis |
+
+![Daily Revenue Trend](figures/02_daily_revenue_trend.png)
+
+![Monthly Revenue](figures/03_monthly_revenue.png)
+
+![Top Products](figures/04_top_products.png)
+
+![Hourly Orders](figures/05_hourly_orders.png)
+
+![RFM Scatter](figures/07_rfm_scatter.png)
+
+![Coefficient Plot](figures/10_coefficient_plot.png)
+
+![Actual vs Predicted](figures/12_actual_vs_predicted.png)
+
+![K-Means Distribution](figures/14_kmeans_distribution.png)
+
+![K-Means Scatter](figures/15_kmeans_scatter.png)
+
+![Silhouette Analysis](figures/18_silhouette.png)
+
+---
+
+*Report Generated: February 2026*
+*Analysis performed using R version 4.x with packages: dplyr, ggplot2, car, MASS, lubridate, scales, cluster, factoextra*

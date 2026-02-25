@@ -1,0 +1,194 @@
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+Loading required package: carData
+
+Attaching package: ‘car’
+
+The following object is masked from ‘package:dplyr’:
+
+    recode
+
+
+Attaching package: ‘MASS’
+
+The following object is masked from ‘package:dplyr’:
+
+    select
+
+Loading customer data...
+Customer dataset: 4346 customers
+
+Missing values:
+         CustomerID             Country        TotalRevenue         TotalOrders 
+                  0                   0                   0                   0 
+         TotalItems       TotalProducts       AvgOrderValue        AvgItemPrice 
+                  0                   0                   0                   0 
+AvgQuantityPerOrder       FirstPurchase        LastPurchase      DaysSinceFirst 
+                  0                   0                   0                   0 
+      DaysSinceLast             R_Score             F_Score             M_Score 
+                  0                   0                   0                   0 
+   Customer_Segment                IsUK 
+                  0                   0 
+After removing NAs: 4346 customers
+
+========================================
+CORRELATION ANALYSIS
+========================================
+
+Correlation matrix (with TotalRevenue):
+       TotalRevenue         TotalOrders          TotalItems       TotalProducts 
+              1.000               0.554               0.923               0.387 
+      AvgOrderValue        AvgItemPrice AvgQuantityPerOrder      DaysSinceFirst 
+              0.393               0.013               0.310               0.149 
+      DaysSinceLast 
+             -0.122 
+
+Variables correlated with TotalRevenue:
+       TotalRevenue          TotalItems         TotalOrders       AvgOrderValue 
+         1.00000000          0.92291078          0.55366372          0.39346896 
+      TotalProducts AvgQuantityPerOrder      DaysSinceFirst        AvgItemPrice 
+         0.38700327          0.31036178          0.14928271          0.01336605 
+      DaysSinceLast 
+        -0.12226577 
+
+========================================
+SIMPLE LINEAR REGRESSION
+========================================
+
+--- Model 1: TotalRevenue ~ TotalOrders ---
+
+Call:
+lm(formula = TotalRevenue ~ TotalOrders, data = customer_data)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-100695    -748      82     366  233717 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  -706.34     129.73  -5.445 5.48e-08 ***
+TotalOrders   646.51      14.75  43.821  < 2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 7480 on 4344 degrees of freedom
+Multiple R-squared:  0.3065,	Adjusted R-squared:  0.3064 
+F-statistic:  1920 on 1 and 4344 DF,  p-value: < 2.2e-16
+
+
+Interpretation:
+  Intercept: -706.34 
+  Slope (TotalOrders): 646.51 
+  R-squared: 0.3065 
+  Adj. R-squared: 0.3064 
+  F-statistic p-value: 0e+00 
+null device 
+          1 
+
+Plot saved: figures/08_linear_regression.png
+
+========================================
+MULTIPLE LINEAR REGRESSION
+========================================
+
+--- Full Model: All Predictors ---
+
+Call:
+lm(formula = TotalRevenue ~ TotalOrders + TotalItems + TotalProducts + 
+    AvgItemPrice + DaysSinceFirst + IsUK, data = customer_data)
+
+Residuals:
+   Min     1Q Median     3Q    Max 
+-42124   -171     16    181 152790 
+
+Coefficients:
+                 Estimate Std. Error t value Pr(>|t|)    
+(Intercept)     196.86255  193.88877   1.015  0.31000    
+TotalOrders      92.51477   10.48851   8.821  < 2e-16 ***
+TotalItems        1.58908    0.01246 127.523  < 2e-16 ***
+TotalProducts    -3.45545    0.84666  -4.081 4.56e-05 ***
+AvgItemPrice      4.68124    1.52039   3.079  0.00209 ** 
+DaysSinceFirst   -0.13699    0.46530  -0.294  0.76846    
+IsUK           -231.39278  175.14571  -1.321  0.18652    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 3424 on 4339 degrees of freedom
+Multiple R-squared:  0.8549,	Adjusted R-squared:  0.8547 
+F-statistic:  4260 on 6 and 4339 DF,  p-value: < 2.2e-16
+
+
+--- VIF Analysis (Full Model) ---
+   TotalOrders     TotalItems  TotalProducts   AvgItemPrice DaysSinceFirst 
+      2.412395       1.463097       1.933158       1.001105       1.114070 
+          IsUK 
+      1.005637 
+
+VIF Interpretation:
+  VIF > 10: High multicollinearity (problematic)
+  VIF > 5: Moderate multicollinearity (caution)
+  VIF < 5: Low multicollinearity (acceptable)
+
+All variables have acceptable VIF values (<5)
+
+========================================
+MODEL DIAGNOSTICS (FULL MODEL)
+========================================
+null device 
+          1 
+Diagnostic plots saved: figures/09_regression_diagnostics.png
+null device 
+          1 
+Coefficient plot saved: figures/10_coefficient_plot.png
+Warning message:
+Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+ℹ Please use `linewidth` instead. 
+null device 
+          1 
+VIF plot saved: figures/11_vif_analysis.png
+
+========================================
+PREDICTION ANALYSIS (FULL MODEL)
+========================================
+
+Prediction Metrics:
+  Mean Absolute Error (MAE): £ 608.14 
+  Root Mean Square Error (RMSE): £ 3420.83 
+  Mean Absolute Percentage Error (MAPE): 42.68 %
+null device 
+          1 
+Actual vs Predicted plot saved: figures/12_actual_vs_predicted.png
+
+========================================
+REGRESSION ANALYSIS SUMMARY
+========================================
+
+1. SIMPLE LINEAR REGRESSION (Revenue ~ Orders):
+   R-squared: 0.3065 
+   Conclusion: TotalOrders explains 30.7 % of revenue variation
+
+2. MULTIPLE REGRESSION (Full Model):
+   R-squared: 0.8549 
+   Adj. R-squared: 0.8547 
+   Significant predictors (p < 0.05):
+[1] "TotalOrders"   "TotalItems"    "TotalProducts" "AvgItemPrice" 
+
+3. VIF ANALYSIS:
+   All variables below threshold:  TRUE 
+
+4. MODEL EQUATION:
+   TotalRevenue =  196.86 +  92.51 * TotalOrders +  1.59 * TotalItems -  3.46 * TotalProducts +  4.68 * AvgItemPrice -  0.14 * DaysSinceFirst -  231.39 * IsUK
+
+Regression results saved to: data/regression_results.rds
+
+
+Regression Analysis completed successfully!

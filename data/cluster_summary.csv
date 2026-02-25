@@ -1,0 +1,5 @@
+"Cluster","Count","Percentage","Avg_Recency","Avg_Frequency","Avg_Monetary","Total_Revenue","Label"
+"3",13,0.3,8,82.5,127338,1655398,"Elite VIP"
+"4",209,4.8,16,22.1,12510,2614539,"VIP Customers"
+"2",3055,70.4,44,3.7,1353,4134106,"Active Customers"
+"1",1061,24.5,249,1.6,478,507365,"Churned Customers"

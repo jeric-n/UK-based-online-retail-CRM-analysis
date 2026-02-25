@@ -1,0 +1,28 @@
+# Local agent instructions
+AGENTS.md
+
+# Python virtual environments
+venv/
+.venv/
+
+# Python cache/build artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.pytest_cache/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Large/non-source presentation and archive artifacts
+*.pptx
+*.zip
+
+# Course materials / reference docs not needed for repo source
+Lessons/
+Term Jan26 CA3.pdf
